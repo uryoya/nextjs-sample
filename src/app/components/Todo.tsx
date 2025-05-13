@@ -1,12 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-
-interface TodoItem {
-  id: number;
-  text: string;
-  completed: boolean;
-}
+import {
+  TodoItem,
+  fetchTodos,
+  createTodo,
+  updateTodo,
+  deleteTodo,
+  clearCompletedTodos,
+} from "../utils/api";
 
 type FilterType = "all" | "active" | "completed";
 
@@ -14,51 +16,83 @@ export default function Todo() {
   const [todos, setTodos] = useState<TodoItem[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [filter, setFilter] = useState<FilterType>("all");
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // ローカルストレージからデータを読み込む
+  // APIからTodoを取得
   useEffect(() => {
-    try {
-      const storedTodos = localStorage.getItem("todos");
-      if (storedTodos) {
-        setTodos(JSON.parse(storedTodos));
+    const loadTodos = async () => {
+      try {
+        setIsLoading(true);
+        const data = await fetchTodos();
+        setTodos(data);
+        setError(null);
+      } catch (err) {
+        console.error("Todoの取得に失敗しました", err);
+        setError("Todoの読み込みに失敗しました。もう一度お試しください。");
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error("ローカルストレージからの読み込みに失敗しました", error);
-    }
-  }, []);
-
-  // データが変更されたらローカルストレージに保存
-  useEffect(() => {
-    try {
-      localStorage.setItem("todos", JSON.stringify(todos));
-    } catch (error) {
-      console.error("ローカルストレージへの保存に失敗しました", error);
-    }
-  }, [todos]);
-
-  const addTodo = () => {
-    if (inputValue.trim() === "") return;
-
-    const newTodo: TodoItem = {
-      id: Date.now(),
-      text: inputValue,
-      completed: false,
     };
 
-    setTodos([...todos, newTodo]);
-    setInputValue("");
+    loadTodos();
+  }, []);
+
+  // 新しいTodoを追加
+  const addTodo = async () => {
+    if (inputValue.trim() === "") return;
+
+    try {
+      const newTodo = await createTodo(inputValue);
+      setTodos([...todos, newTodo]);
+      setInputValue("");
+      setError(null);
+    } catch (err) {
+      console.error("Todoの追加に失敗しました", err);
+      setError("Todoの追加に失敗しました。もう一度お試しください。");
+    }
   };
 
-  const toggleTodo = (id: number) => {
-    setTodos(
-      todos.map((todo) =>
-        todo.id === id ? { ...todo, completed: !todo.completed } : todo
-      )
-    );
+  // Todoの完了状態を切り替える
+  const toggleTodo = async (id: number) => {
+    try {
+      const todoToUpdate = todos.find((todo) => todo.id === id);
+      if (!todoToUpdate) return;
+
+      const updatedTodo = await updateTodo(id, {
+        completed: !todoToUpdate.completed,
+      });
+
+      setTodos(todos.map((todo) => (todo.id === id ? updatedTodo : todo)));
+      setError(null);
+    } catch (err) {
+      console.error("Todoの更新に失敗しました", err);
+      setError("Todoの更新に失敗しました。もう一度お試しください。");
+    }
   };
 
-  const deleteTodo = (id: number) => {
-    setTodos(todos.filter((todo) => todo.id !== id));
+  // Todoを削除
+  const deleteTodoItem = async (id: number) => {
+    try {
+      await deleteTodo(id);
+      setTodos(todos.filter((todo) => todo.id !== id));
+      setError(null);
+    } catch (err) {
+      console.error("Todoの削除に失敗しました", err);
+      setError("Todoの削除に失敗しました。もう一度お試しください。");
+    }
+  };
+
+  // 完了したTodoをすべて削除
+  const clearCompleted = async () => {
+    try {
+      const updatedTodos = await clearCompletedTodos();
+      setTodos(updatedTodos);
+      setError(null);
+    } catch (err) {
+      console.error("完了したTodoの削除に失敗しました", err);
+      setError("完了したTodoの削除に失敗しました。もう一度お試しください。");
+    }
   };
 
   // フィルタリングされたTodoリストを取得
@@ -68,14 +102,14 @@ export default function Todo() {
     return true; // 'all'の場合は全て表示
   });
 
-  // すべてのタスクを削除
-  const clearCompleted = () => {
-    setTodos(todos.filter((todo) => !todo.completed));
-  };
-
   return (
     <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
       <h1 className="text-2xl font-bold mb-4">Todoリスト</h1>
+
+      {/* エラーメッセージ */}
+      {error && (
+        <div className="mb-4 p-2 bg-red-100 text-red-700 rounded">{error}</div>
+      )}
 
       <div className="flex mb-4">
         <input
@@ -85,10 +119,12 @@ export default function Todo() {
           onKeyDown={(e) => e.key === "Enter" && addTodo()}
           className="flex-grow p-2 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           placeholder="新しいタスクを入力..."
+          disabled={isLoading}
         />
         <button
           onClick={addTodo}
-          className="bg-blue-500 text-white px-4 py-2 rounded-r-lg hover:bg-blue-600 transition-colors"
+          className="bg-blue-500 text-white px-4 py-2 rounded-r-lg hover:bg-blue-600 transition-colors disabled:bg-blue-300"
+          disabled={isLoading || inputValue.trim() === ""}
         >
           追加
         </button>
@@ -103,6 +139,7 @@ export default function Todo() {
               ? "bg-blue-500 text-white"
               : "bg-gray-200 text-gray-700 hover:bg-gray-300"
           }`}
+          disabled={isLoading}
         >
           すべて
         </button>
@@ -113,6 +150,7 @@ export default function Todo() {
               ? "bg-blue-500 text-white"
               : "bg-gray-200 text-gray-700 hover:bg-gray-300"
           }`}
+          disabled={isLoading}
         >
           未完了
         </button>
@@ -123,60 +161,70 @@ export default function Todo() {
               ? "bg-blue-500 text-white"
               : "bg-gray-200 text-gray-700 hover:bg-gray-300"
           }`}
+          disabled={isLoading}
         >
           完了済み
         </button>
       </div>
 
-      <ul className="space-y-2">
-        {filteredTodos.map((todo) => (
-          <li
-            key={todo.id}
-            className="flex items-center p-2 border border-gray-200 rounded-lg"
-          >
-            <input
-              type="checkbox"
-              checked={todo.completed}
-              onChange={() => toggleTodo(todo.id)}
-              className="mr-2"
-            />
-            <span
-              className={`flex-grow ${
-                todo.completed ? "line-through text-gray-400" : ""
-              }`}
-            >
-              {todo.text}
-            </span>
-            <button
-              onClick={() => deleteTodo(todo.id)}
-              className="text-red-500 hover:text-red-700"
-            >
-              削除
-            </button>
-          </li>
-        ))}
-      </ul>
-
-      {filteredTodos.length === 0 && (
-        <p className="text-gray-500 text-center mt-4">
-          {filter === "all"
-            ? "タスクがありません"
-            : filter === "active"
-            ? "未完了のタスクがありません"
-            : "完了済みのタスクがありません"}
-        </p>
-      )}
-
-      {/* 完了したタスクを一括削除するボタン */}
-      {todos.some((todo) => todo.completed) && (
-        <div className="mt-4 text-center">
-          <button
-            onClick={clearCompleted}
-            className="text-sm text-gray-500 hover:text-gray-700"
-          >
-            完了したタスクをすべて削除
-          </button>
+      {/* ローディング状態 */}
+      {isLoading ? (
+        <div className="flex justify-center my-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
         </div>
+      ) : (
+        <>
+          <ul className="space-y-2">
+            {filteredTodos.map((todo) => (
+              <li
+                key={todo.id}
+                className="flex items-center p-2 border border-gray-200 rounded-lg"
+              >
+                <input
+                  type="checkbox"
+                  checked={todo.completed}
+                  onChange={() => toggleTodo(todo.id)}
+                  className="mr-2"
+                />
+                <span
+                  className={`flex-grow ${
+                    todo.completed ? "line-through text-gray-400" : ""
+                  }`}
+                >
+                  {todo.text}
+                </span>
+                <button
+                  onClick={() => deleteTodoItem(todo.id)}
+                  className="text-red-500 hover:text-red-700"
+                >
+                  削除
+                </button>
+              </li>
+            ))}
+          </ul>
+
+          {filteredTodos.length === 0 && (
+            <p className="text-gray-500 text-center mt-4">
+              {filter === "all"
+                ? "タスクがありません"
+                : filter === "active"
+                ? "未完了のタスクがありません"
+                : "完了済みのタスクがありません"}
+            </p>
+          )}
+
+          {/* 完了したタスクを一括削除するボタン */}
+          {todos.some((todo) => todo.completed) && (
+            <div className="mt-4 text-center">
+              <button
+                onClick={clearCompleted}
+                className="text-sm text-gray-500 hover:text-gray-700"
+              >
+                完了したタスクをすべて削除
+              </button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
