@@ -1,4 +1,56 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Next.js Todoアプリケーション
+
+これはNext.js学習のためのシンプルなTodoアプリケーションです。フロントエンドだけでなく、Next.jsの基本的なコンセプトを理解するために作成されました。
+
+## 機能
+
+- タスクの追加、削除、完了状態の切り替え
+- ローカルストレージを使用したタスクの永続化
+- フィルタリング機能（すべて、未完了、完了済み）
+- 完了したタスクの一括削除
+
+## 技術スタック
+
+- [Next.js](https://nextjs.org/) - Reactフレームワーク
+- [TypeScript](https://www.typescriptlang.org/) - 型安全なJavaScript
+- [Tailwind CSS](https://tailwindcss.com/) - スタイリング
+
+## クイックスタート
+
+```bash
+# リポジトリのクローン
+git clone <repository-url>
+
+# 依存関係のインストール
+npm install
+
+# 開発サーバーの起動
+npm run dev
+```
+
+開発サーバーが起動したら、ブラウザで [http://localhost:3000](http://localhost:3000) にアクセスして、アプリケーションを使用できます。
+
+## 学習ポイント
+
+このプロジェクトでは以下のNext.jsの概念を学ぶことができます：
+
+- App Router
+- クライアントコンポーネントとサーバーコンポーネント
+- 状態管理
+- 動的インポート
+
+## 次のステップ
+
+このプロジェクトを拡張する方法：
+
+1. バックエンドAPIの追加（Next.js API Routesを使用）
+2. データベースとの連携（例：PrismaとPostgreSQLなど）
+3. 認証機能の追加（NextAuth.jsを使用）
+4. UIの改善（アニメーションやダークモードなど）
+
+---
+
+This project is bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started
 
