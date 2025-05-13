@@ -42,6 +42,7 @@ npm run dev
 - [API Routesの解説](docs/api-routes.md) - Next.jsでのバックエンドAPI開発について
 - [GraphQL実装とBFFパターン](docs/graphql.md) - Next.jsでのGraphQL実装とBFFパターン
 - [Next.jsの重要概念と実践的テクニック](docs/advanced-concepts.md) - サーバーコンポーネント、データフェッチング戦略、ルーティング、最適化など
+- [認証の実装](docs/authentication.md) - Next.jsでの認証システムの構築方法
 
 ## 学習ポイント
 
