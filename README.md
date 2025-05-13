@@ -5,7 +5,7 @@
 ## 機能
 
 - タスクの追加、削除、完了状態の切り替え
-- ローカルストレージを使用したタスクの永続化
+- API Routesを使用したデータ管理
 - フィルタリング機能（すべて、未完了、完了済み）
 - 完了したタスクの一括削除
 
@@ -30,6 +30,15 @@ npm run dev
 
 開発サーバーが起動したら、ブラウザで [http://localhost:3000](http://localhost:3000) にアクセスして、アプリケーションを使用できます。
 
+## 学習リソース
+
+このプロジェクトには、Next.jsを学ぶためのドキュメントが含まれています：
+
+- [Next.jsの基本概念](docs/get-started.md) - App Router、サーバーコンポーネント、データフェッチなど
+- [API Routesの解説](docs/api-routes.md) - Next.jsでのバックエンドAPI開発について
+- [GraphQL実装とBFFパターン](docs/graphql.md) - Next.jsでのGraphQL実装とBFFパターン
+- [Next.jsの重要概念と実践的テクニック](docs/advanced-concepts.md) - サーバーコンポーネント、データフェッチング戦略、ルーティング、最適化など
+
 ## 学習ポイント
 
 このプロジェクトでは以下のNext.jsの概念を学ぶことができます：
@@ -38,15 +47,18 @@ npm run dev
 - クライアントコンポーネントとサーバーコンポーネント
 - 状態管理
 - 動的インポート
+- API Routes（RESTful API）
+- フロントエンドとバックエンドの統合
 
 ## 次のステップ
 
 このプロジェクトを拡張する方法：
 
-1. バックエンドAPIの追加（Next.js API Routesを使用）
-2. データベースとの連携（例：PrismaとPostgreSQLなど）
-3. 認証機能の追加（NextAuth.jsを使用）
-4. UIの改善（アニメーションやダークモードなど）
+1. データベースとの連携（例：PrismaとPostgreSQLなど）
+2. 認証機能の追加（NextAuth.jsを使用）
+3. UIの改善（アニメーションやダークモードなど）
+4. テストの追加（Jest、React Testing Library）
+5. デプロイ（Vercel、AWS、Dockerなど）
 
 ---
 
